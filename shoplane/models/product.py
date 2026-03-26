@@ -56,6 +56,10 @@ class Product(TimeStampedModel):
                 condition=models.Q(price__gte=0), name="product_price_gte_0"
             ),
         ]
+        indexes = [
+            # Public list always filters on both flags together.
+            models.Index(fields=["is_active", "is_deleted"], name="product_active_deleted_idx"),
+        ]
 
     def __str__(self):
         return self.name

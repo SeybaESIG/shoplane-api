@@ -9,7 +9,11 @@ def test_health_endpoint_returns_expected_payload():
     response = client.get("/api/v1/health/")
 
     assert response.status_code == 200
-    assert response.json() == {"service": "shoplane-api", "status": "ok"}
+    assert response.json() == {
+        "success": True,
+        "message": "Health check successful",
+        "data": {"service": "shoplane-api", "status": "ok"},
+    }
 
 
 @pytest.mark.django_db
@@ -28,3 +32,9 @@ def test_health_endpoint_rejects_unsupported_method():
     response = client.post("/api/v1/health/", {})
 
     assert response.status_code == 405
+    assert response.json() == {
+        "success": False,
+        "message": "Method \"POST\" not allowed.",
+        "errors": None,
+        "code": "method_not_allowed",
+    }

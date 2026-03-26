@@ -30,6 +30,12 @@ class Order(TimeStampedModel):
                 condition=models.Q(total_price__gte=0), name="order_total_price_gte_0"
             ),
         ]
+        indexes = [
+            # Status filter on the order list endpoint.
+            models.Index(fields=["status"], name="order_status_idx"),
+            # Default sort and date-range queries on the order list.
+            models.Index(fields=["-created_at"], name="order_created_at_idx"),
+        ]
 
     def __str__(self):
         return f"Order<{self.id}>"
