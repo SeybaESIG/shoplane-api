@@ -3,7 +3,6 @@ Query parameter filtering and ordering helpers.
 
 Each function takes a queryset and a request, applies the relevant
 query parameters, and returns the filtered/ordered queryset.
-No third-party dependencies -- plain Django ORM.
 """
 
 from decimal import Decimal, InvalidOperation
