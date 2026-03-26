@@ -28,6 +28,7 @@ staticfiles/
 .env
 .env.*
 !.env.example
+!.env.*.example
 
 # Test and coverage
 .coverage

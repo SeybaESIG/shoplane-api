@@ -52,6 +52,24 @@ Backend API for the Shoplane project built with Django, DRF, PostgreSQL, and Doc
   - payment amount and transaction reference constraints
   - delete protections and payment log defaults/ordering
 
-## Schema
+## API and Environment Conventions
+
+- API version prefix: `/api/v1/`
+- Response contract:
+  - success: `success`, `message`, `data`, optional `meta`
+  - error: `success`, `message`, `errors`, `code`
+- Naming:
+  - endpoints use plural resources (for example: `/products/`, `/orders/`)
+  - serializers use explicit names (for example: `ProductSerializer`, `OrderCreateSerializer`)
+- Settings strategy:
+  - `DJANGO_ENV=dev|staging|prod`
+  - settings split into base + environment overrides
+- Minimal pre-push quality checks:
+  - `python manage.py check`
+  - `python manage.py makemigrations --check --dry-run`
+  - `pytest -q`
+
+## Documentation
 
 - Base UML/ER schema: `docs/schema.md`
+- API versioning & deprecation policy: `docs/api-versioning-policy.md`
