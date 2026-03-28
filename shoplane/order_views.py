@@ -13,7 +13,7 @@ from .api.filters import filter_orders
 from .api.pagination import StandardPagination
 from .api.responses import error_response, success_response
 from .api.serializers import CancelOrderSerializer, CreateOrderSerializer, OrderSerializer
-from .models import Cart, CartStatus, Order, OrderItem, OrderStatus
+from .models import Cart, CartStatus, Order, OrderItem, OrderStatus, Product
 
 
 CANCELLATION_WINDOW_HOURS = 24
@@ -124,10 +124,19 @@ class OrderListCreateView(APIView):
         if not cart_items:
             raise ValidationError("Your cart is empty.")
 
+        product_ids = [item.product_id for item in cart_items]
+
         with transaction.atomic():
-            # Re-check stock for every item before touching anything.
+            # Acquire row-level locks on all products before reading stock.
+            # Concurrent checkouts block here until the first transaction commits,
+            # then re-read the committed stock value -- preventing overselling.
+            locked_products = {
+                p.id: p
+                for p in Product.objects.select_for_update().filter(id__in=product_ids)
+            }
+
             for item in cart_items:
-                product = item.product
+                product = locked_products[item.product_id]
                 if not product.is_active or product.is_deleted:
                     raise ValidationError(
                         f"'{product.name}' is no longer available."
@@ -149,7 +158,7 @@ class OrderListCreateView(APIView):
 
             # Snapshot cart items and decrement stock.
             for item in cart_items:
-                product = item.product
+                product = locked_products[item.product_id]
                 OrderItem.objects.create(
                     order=order,
                     product=product,

@@ -72,6 +72,9 @@ class CartItem(TimeStampedModel):
                 fields=["cart", "product"], name="unique_cart_product"
             ),
             models.CheckConstraint(
+                condition=models.Q(quantity__gte=1), name="cart_item_quantity_gte_1"
+            ),
+            models.CheckConstraint(
                 condition=models.Q(unit_price__gte=0), name="cart_item_unit_price_gte_0"
             ),
             models.CheckConstraint(

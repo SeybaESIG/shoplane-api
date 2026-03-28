@@ -51,6 +51,9 @@ class OrderItem(models.Model):
     class Meta:
         constraints = [
             models.CheckConstraint(
+                condition=models.Q(quantity__gte=1), name="order_item_quantity_gte_1"
+            ),
+            models.CheckConstraint(
                 condition=models.Q(unit_price__gte=0), name="order_item_unit_price_gte_0"
             ),
             models.CheckConstraint(
