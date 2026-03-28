@@ -46,12 +46,17 @@ class Cart(TimeStampedModel):
         cart_item, created = CartItem.objects.get_or_create(
             cart=self,
             product=product,
-            defaults={"quantity": 0},
+            defaults={
+                "quantity": quantity,
+                "unit_price": product.price,
+                "subtotal": product.price * quantity,
+            },
         )
-        cart_item.quantity += quantity
-        cart_item.unit_price = product.price
-        cart_item.subtotal = cart_item.unit_price * cart_item.quantity
-        cart_item.save()
+        if not created:
+            cart_item.quantity += quantity
+            cart_item.unit_price = product.price
+            cart_item.subtotal = cart_item.unit_price * cart_item.quantity
+            cart_item.save()
 
         self.recompute_total()
         return cart_item, created
