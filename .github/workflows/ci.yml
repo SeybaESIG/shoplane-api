@@ -64,8 +64,8 @@ jobs:
           ruff check .
           ruff format --check .
 
-      - name: Migration check
-        run: python manage.py migrate --check
+      - name: Check no migrations are missing
+        run: python manage.py makemigrations --check --dry-run
 
       - name: Run tests with coverage
         run: |
