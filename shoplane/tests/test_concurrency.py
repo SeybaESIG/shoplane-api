@@ -12,9 +12,9 @@ import threading
 from decimal import Decimal
 
 import pytest
+from django.contrib.auth import get_user_model
 
 from shoplane.models import Cart, CartItem, CartStatus, Category, Product
-from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
@@ -93,6 +93,5 @@ def test_concurrent_orders_never_oversell():
 
     successful = [s for s in results if s == 201]
     assert len(successful) == 1, (
-        f"Expected exactly 1 successful order, got {len(successful)}. "
-        f"All statuses: {results}"
+        f"Expected exactly 1 successful order, got {len(successful)}. All statuses: {results}"
     )

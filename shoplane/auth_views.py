@@ -19,6 +19,7 @@ User = get_user_model()
 # Serializers
 # ---------------------------------------------------------------------------
 
+
 class RegisterSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
@@ -70,6 +71,7 @@ class JWTLogoutSerializer(serializers.Serializer):
 
 class EnvelopeSerializer(serializers.Serializer):
     """Base envelope matching success_response shape."""
+
     success = serializers.BooleanField(default=True)
     message = serializers.CharField()
     data = serializers.DictField()
@@ -78,6 +80,7 @@ class EnvelopeSerializer(serializers.Serializer):
 # ---------------------------------------------------------------------------
 # Views
 # ---------------------------------------------------------------------------
+
 
 class RegisterView(APIView):
     permission_classes = [AllowAny]

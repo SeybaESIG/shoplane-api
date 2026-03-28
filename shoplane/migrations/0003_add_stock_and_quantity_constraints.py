@@ -4,22 +4,27 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('shoplane', '0002_add_product_and_order_indexes'),
+        ("shoplane", "0002_add_product_and_order_indexes"),
     ]
 
     operations = [
         migrations.AddConstraint(
-            model_name='cartitem',
-            constraint=models.CheckConstraint(condition=models.Q(('quantity__gte', 1)), name='cart_item_quantity_gte_1'),
+            model_name="cartitem",
+            constraint=models.CheckConstraint(
+                condition=models.Q(("quantity__gte", 1)), name="cart_item_quantity_gte_1"
+            ),
         ),
         migrations.AddConstraint(
-            model_name='orderitem',
-            constraint=models.CheckConstraint(condition=models.Q(('quantity__gte', 1)), name='order_item_quantity_gte_1'),
+            model_name="orderitem",
+            constraint=models.CheckConstraint(
+                condition=models.Q(("quantity__gte", 1)), name="order_item_quantity_gte_1"
+            ),
         ),
         migrations.AddConstraint(
-            model_name='product',
-            constraint=models.CheckConstraint(condition=models.Q(('stock__gte', 0)), name='product_stock_gte_0'),
+            model_name="product",
+            constraint=models.CheckConstraint(
+                condition=models.Q(("stock__gte", 0)), name="product_stock_gte_0"
+            ),
         ),
     ]

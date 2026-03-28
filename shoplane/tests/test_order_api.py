@@ -45,6 +45,7 @@ def checkout_payload():
 # POST /orders/ -- create order
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.django_db
 def test_create_order_from_cart(auth_client, open_cart_with_product, checkout_payload, product):
     initial_stock = product.stock
@@ -70,13 +71,14 @@ def test_create_order_sets_billing_address_to_shipping_when_omitted(
 
 
 @pytest.mark.django_db
-def test_create_order_accepts_separate_billing_address(
-    auth_client, open_cart_with_product
-):
-    response = auth_client.post(reverse("order-list"), {
-        "shipping_address": "10 Ship St",
-        "billing_address": "20 Bill Ave",
-    })
+def test_create_order_accepts_separate_billing_address(auth_client, open_cart_with_product):
+    response = auth_client.post(
+        reverse("order-list"),
+        {
+            "shipping_address": "10 Ship St",
+            "billing_address": "20 Bill Ave",
+        },
+    )
     assert response.status_code == 201
     assert response.data["data"]["billing_address"] == "20 Bill Ave"
 
@@ -108,17 +110,13 @@ def test_create_order_without_cart_returns_400(auth_client, checkout_payload):
 
 
 @pytest.mark.django_db
-def test_create_order_missing_shipping_address_returns_400(
-    auth_client, open_cart_with_product
-):
+def test_create_order_missing_shipping_address_returns_400(auth_client, open_cart_with_product):
     response = auth_client.post(reverse("order-list"), {})
     assert response.status_code == 400
 
 
 @pytest.mark.django_db
-def test_create_order_with_blank_shipping_address_returns_400(
-    auth_client, open_cart_with_product
-):
+def test_create_order_with_blank_shipping_address_returns_400(auth_client, open_cart_with_product):
     response = auth_client.post(reverse("order-list"), {"shipping_address": "   "})
     assert response.status_code == 400
 
@@ -129,8 +127,11 @@ def test_create_order_with_insufficient_stock_returns_400(
 ):
     """Stock check at checkout time blocks order if stock dropped since add-to-cart."""
     low_stock = Product.objects.create(
-        name="Low Stock Item", category=category,
-        price=Decimal("10.00"), stock=1, updated_by=admin_user,
+        name="Low Stock Item",
+        category=category,
+        price=Decimal("10.00"),
+        stock=1,
+        updated_by=admin_user,
     )
     cart = Cart.objects.get_or_create(user=user)[0]
     cart.add_product(product=low_stock, quantity=1)
@@ -155,6 +156,7 @@ def test_create_order_with_converted_cart_returns_400(
 # ---------------------------------------------------------------------------
 # GET /orders/ -- list orders
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.django_db
 def test_list_orders_returns_own_orders_only(
@@ -183,6 +185,7 @@ def test_admin_can_list_all_orders(admin_client, order):
 # GET /orders/{order_number}/ -- retrieve order
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.django_db
 def test_retrieve_own_order(auth_client, open_cart_with_product, checkout_payload):
     create_resp = auth_client.post(reverse("order-list"), checkout_payload)
@@ -196,15 +199,21 @@ def test_retrieve_own_order(auth_client, open_cart_with_product, checkout_payloa
 def test_retrieve_other_users_order_returns_404(admin_user, category):
     """Non-owner gets 404 (not 403) to avoid leaking order existence."""
     from uuid import uuid4
-    from shoplane.models import User, Order, OrderStatus
+
+    from shoplane.models import Order, User
+
     # Create two separate users with separate clients.
     owner = User.objects.create_user(
         email=f"owner-{uuid4().hex[:6]}@example.com",
-        password="StrongPass123!", first_name="Owner", last_name="User",
+        password="StrongPass123!",
+        first_name="Owner",
+        last_name="User",
     )
     stranger = User.objects.create_user(
         email=f"stranger-{uuid4().hex[:6]}@example.com",
-        password="StrongPass123!", first_name="Stranger", last_name="User",
+        password="StrongPass123!",
+        first_name="Stranger",
+        last_name="User",
     )
     owner_order = Order.objects.create(
         user=owner,
@@ -231,6 +240,7 @@ def test_admin_can_retrieve_any_order(admin_client, order):
 # ---------------------------------------------------------------------------
 # PATCH /orders/{order_number}/ -- cancel order
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.django_db
 def test_user_can_cancel_order_within_window(
@@ -272,9 +282,7 @@ def test_user_cannot_cancel_order_after_window(
 
 
 @pytest.mark.django_db
-def test_admin_can_cancel_order_after_window(
-    admin_client, order
-):
+def test_admin_can_cancel_order_after_window(admin_client, order):
     """Admins bypass the 24-hour window."""
     order.created_at = timezone.now() - timedelta(hours=48)
     order.save(update_fields=["created_at"])

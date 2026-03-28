@@ -12,10 +12,18 @@ class ProductReadSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = [
-            "id", "name", "slug", "description",
-            "price", "stock", "is_active", "is_deleted",
-            "category_slug", "category_name",
-            "created_at", "updated_at",
+            "id",
+            "name",
+            "slug",
+            "description",
+            "price",
+            "stock",
+            "is_active",
+            "is_deleted",
+            "category_slug",
+            "category_name",
+            "created_at",
+            "updated_at",
         ]
 
 

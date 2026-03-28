@@ -25,9 +25,7 @@ class PaymentLogEventType(models.TextChoices):
 
 
 class Payment(TimeStampedModel):
-    order = models.OneToOneField(
-        Order, related_name="payment", on_delete=models.PROTECT
-    )
+    order = models.OneToOneField(Order, related_name="payment", on_delete=models.PROTECT)
     provider = models.CharField(max_length=20, choices=PaymentProvider.choices)
     status = models.CharField(
         max_length=20, choices=PaymentStatus.choices, default=PaymentStatus.PENDING
@@ -46,9 +44,7 @@ class Payment(TimeStampedModel):
 
     class Meta:
         constraints = [
-            models.CheckConstraint(
-                condition=models.Q(amount__gte=0), name="payment_amount_gte_0"
-            ),
+            models.CheckConstraint(condition=models.Q(amount__gte=0), name="payment_amount_gte_0"),
         ]
 
     def __str__(self):

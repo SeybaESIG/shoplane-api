@@ -14,12 +14,12 @@ import pytest
 from django.urls import reverse
 from rest_framework.test import APIClient
 
-from shoplane.models import Cart, Category, Order, Payment, PaymentProvider, Product, User
-
+from shoplane.models import Cart, Order, Payment, PaymentProvider, User
 
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
+
 
 @pytest.fixture
 def anon():
@@ -86,6 +86,7 @@ def other_payment(other_order, other_user):
 # 1. Unauthenticated access -- every protected endpoint must return 401
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.django_db
 class TestUnauthenticated:
     """All endpoints that require authentication must reject anonymous requests."""
@@ -106,14 +107,20 @@ class TestUnauthenticated:
         assert anon.post(reverse("cart-item-add"), {}).status_code == 401
 
     def test_cart_item_update(self, anon, product):
-        assert anon.patch(
-            reverse("cart-item-detail", kwargs={"product_slug": product.slug}), {}
-        ).status_code == 401
+        assert (
+            anon.patch(
+                reverse("cart-item-detail", kwargs={"product_slug": product.slug}), {}
+            ).status_code
+            == 401
+        )
 
     def test_cart_item_delete(self, anon, product):
-        assert anon.delete(
-            reverse("cart-item-detail", kwargs={"product_slug": product.slug})
-        ).status_code == 401
+        assert (
+            anon.delete(
+                reverse("cart-item-detail", kwargs={"product_slug": product.slug})
+            ).status_code
+            == 401
+        )
 
     def test_order_list(self, anon):
         assert anon.get(reverse("order-list")).status_code == 401
@@ -122,29 +129,42 @@ class TestUnauthenticated:
         assert anon.post(reverse("order-list"), {}).status_code == 401
 
     def test_order_detail(self, anon, order):
-        assert anon.get(
-            reverse("order-detail", kwargs={"order_number": order.order_number})
-        ).status_code == 401
+        assert (
+            anon.get(
+                reverse("order-detail", kwargs={"order_number": order.order_number})
+            ).status_code
+            == 401
+        )
 
     def test_order_cancel(self, anon, order):
-        assert anon.patch(
-            reverse("order-detail", kwargs={"order_number": order.order_number}), {}
-        ).status_code == 401
+        assert (
+            anon.patch(
+                reverse("order-detail", kwargs={"order_number": order.order_number}), {}
+            ).status_code
+            == 401
+        )
 
     def test_payment_get(self, anon, order):
-        assert anon.get(
-            reverse("payment", kwargs={"order_number": order.order_number})
-        ).status_code == 401
+        assert (
+            anon.get(reverse("payment", kwargs={"order_number": order.order_number})).status_code
+            == 401
+        )
 
     def test_payment_initiate(self, anon, order):
-        assert anon.post(
-            reverse("payment", kwargs={"order_number": order.order_number}), {}
-        ).status_code == 401
+        assert (
+            anon.post(
+                reverse("payment", kwargs={"order_number": order.order_number}), {}
+            ).status_code
+            == 401
+        )
 
     def test_payment_logs(self, anon, order):
-        assert anon.get(
-            reverse("payment-logs", kwargs={"order_number": order.order_number})
-        ).status_code == 401
+        assert (
+            anon.get(
+                reverse("payment-logs", kwargs={"order_number": order.order_number})
+            ).status_code
+            == 401
+        )
 
     def test_logout(self, anon):
         assert anon.post(reverse("jwt-logout"), {}).status_code == 401
@@ -154,49 +174,65 @@ class TestUnauthenticated:
 # 2. Regular user hitting admin-only endpoints -- must return 403
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.django_db
 class TestRegularUserForbidden:
     """Endpoints restricted to admins must return 403 for authenticated regular users."""
 
     def test_category_create(self, user_client):
-        assert user_client.post(
-            reverse("category-list"), {"name": "Blocked"}
-        ).status_code == 403
+        assert user_client.post(reverse("category-list"), {"name": "Blocked"}).status_code == 403
 
     def test_category_update(self, user_client, category):
-        assert user_client.patch(
-            reverse("category-detail", kwargs={"slug": category.slug}), {}
-        ).status_code == 403
+        assert (
+            user_client.patch(
+                reverse("category-detail", kwargs={"slug": category.slug}), {}
+            ).status_code
+            == 403
+        )
 
     def test_category_delete(self, user_client, category):
-        assert user_client.delete(
-            reverse("category-detail", kwargs={"slug": category.slug})
-        ).status_code == 403
+        assert (
+            user_client.delete(
+                reverse("category-detail", kwargs={"slug": category.slug})
+            ).status_code
+            == 403
+        )
 
     def test_product_create(self, user_client, category):
-        assert user_client.post(
-            reverse("product-list"), {"name": "Blocked", "category": category.slug}
-        ).status_code == 403
+        assert (
+            user_client.post(
+                reverse("product-list"), {"name": "Blocked", "category": category.slug}
+            ).status_code
+            == 403
+        )
 
     def test_product_update(self, user_client, product):
-        assert user_client.patch(
-            reverse("product-detail", kwargs={"slug": product.slug}), {}
-        ).status_code == 403
+        assert (
+            user_client.patch(
+                reverse("product-detail", kwargs={"slug": product.slug}), {}
+            ).status_code
+            == 403
+        )
 
     def test_product_delete(self, user_client, product):
-        assert user_client.delete(
-            reverse("product-detail", kwargs={"slug": product.slug})
-        ).status_code == 403
+        assert (
+            user_client.delete(reverse("product-detail", kwargs={"slug": product.slug})).status_code
+            == 403
+        )
 
     def test_payment_logs(self, user_client, order):
-        assert user_client.get(
-            reverse("payment-logs", kwargs={"order_number": order.order_number})
-        ).status_code == 403
+        assert (
+            user_client.get(
+                reverse("payment-logs", kwargs={"order_number": order.order_number})
+            ).status_code
+            == 403
+        )
 
 
 # ---------------------------------------------------------------------------
 # 3. Cross-user access -- users must not be able to touch other users' data
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.django_db
 class TestCrossUserAccess:

@@ -58,8 +58,13 @@ class TestOrderExport:
         rows = _parse_csv(self.admin.get(self.url))
         assert len(rows) >= 1
         assert set(rows[0].keys()) == {
-            "order_number", "status", "total_price",
-            "user_email", "shipping_address", "billing_address", "created_at",
+            "order_number",
+            "status",
+            "total_price",
+            "user_email",
+            "shipping_address",
+            "billing_address",
+            "created_at",
         }
 
     def test_csv_row_matches_order_data(self):
@@ -126,7 +131,11 @@ class TestCustomerExport:
         rows = _parse_csv(self.admin.get(self.url))
         assert len(rows) >= 1
         assert set(rows[0].keys()) == {
-            "email", "first_name", "last_name", "order_count", "total_spend",
+            "email",
+            "first_name",
+            "last_name",
+            "order_count",
+            "total_spend",
         }
 
     def test_csv_row_aggregates_correctly(self):

@@ -17,7 +17,6 @@ from decimal import Decimal
 from uuid import uuid4
 
 import pytest
-from django.core.cache import cache
 from django.urls import reverse
 from rest_framework.test import APIClient
 
@@ -27,8 +26,12 @@ from shoplane.models import Product
 def _make_product(category, user):
     s = uuid4().hex[:8]
     return Product.objects.create(
-        name=f"Product {s}", slug=f"product-{s}", category=category,
-        price=Decimal("19.99"), stock=10, updated_by=user,
+        name=f"Product {s}",
+        slug=f"product-{s}",
+        category=category,
+        price=Decimal("19.99"),
+        stock=10,
+        updated_by=user,
     )
 
 
@@ -60,7 +63,12 @@ class TestProductListCache:
 
         res = admin.post(
             reverse("product-list"),
-            {"name": f"New {uuid4().hex[:6]}", "price": "9.99", "stock": 5, "category": category.slug},
+            {
+                "name": f"New {uuid4().hex[:6]}",
+                "price": "9.99",
+                "stock": 5,
+                "category": category.slug,
+            },
             format="json",
         )
         assert res.status_code == 201
@@ -225,9 +233,7 @@ class TestCategoryListCache:
 
 @pytest.mark.django_db
 class TestCacheNamespaceIsolation:
-    def test_product_write_does_not_invalidate_category_cache(
-        self, admin_user, user, category
-    ):
+    def test_product_write_does_not_invalidate_category_cache(self, admin_user, user, category):
         """Bumping the product cache version must leave the category version untouched."""
         from shoplane.api.cache import _get_version
 
@@ -241,7 +247,12 @@ class TestCacheNamespaceIsolation:
         # Write a product (triggers product cache invalidation only).
         admin.post(
             reverse("product-list"),
-            {"name": f"Iso {uuid4().hex[:6]}", "price": "5.00", "stock": 1, "category": category.slug},
+            {
+                "name": f"Iso {uuid4().hex[:6]}",
+                "price": "5.00",
+                "stock": 1,
+                "category": category.slug,
+            },
             format="json",
         )
 

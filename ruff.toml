@@ -1,0 +1,16 @@
+target-version = "py313"
+line-length = 100
+
+[lint]
+select = ["E", "F", "W", "I"]
+ignore = [
+    "E501",   # line too long -- handled by formatter
+]
+exclude = [
+    "shoplane/migrations/",
+    ".venv/",
+]
+
+[format]
+quote-style = "double"
+indent-style = "space"

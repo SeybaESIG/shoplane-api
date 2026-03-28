@@ -9,8 +9,7 @@ import pytest
 from django.urls import reverse
 from rest_framework.test import APIClient
 
-from shoplane.models import Category, Order, Product, User
-
+from shoplane.models import Category, Order, Product
 
 # ---------------------------------------------------------------------------
 # Shared helpers

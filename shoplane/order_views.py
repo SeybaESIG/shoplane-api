@@ -11,10 +11,9 @@ from rest_framework.views import APIView
 
 from .api.filters import filter_orders
 from .api.pagination import StandardPagination
-from .api.responses import error_response, success_response
+from .api.responses import success_response
 from .api.serializers import CancelOrderSerializer, CreateOrderSerializer, OrderSerializer
 from .models import Cart, CartStatus, Order, OrderItem, OrderStatus, Product
-
 
 CANCELLATION_WINDOW_HOURS = 24
 
@@ -30,9 +29,7 @@ def _get_order(order_number, user):
     Non-admin users can only access their own orders.
     """
     try:
-        order = Order.objects.prefetch_related("items__product").get(
-            order_number=order_number
-        )
+        order = Order.objects.prefetch_related("items__product").get(order_number=order_number)
     except Order.DoesNotExist:
         raise NotFound(f"No order found with number '{order_number}'.")
 
@@ -71,9 +68,7 @@ class OrderListCreateView(APIView):
         if request.user.is_staff:
             orders = Order.objects.prefetch_related("items__product").all()
         else:
-            orders = Order.objects.prefetch_related("items__product").filter(
-                user=request.user
-            )
+            orders = Order.objects.prefetch_related("items__product").filter(user=request.user)
         orders = filter_orders(orders, request)
 
         paginator = StandardPagination()
@@ -104,14 +99,10 @@ class OrderListCreateView(APIView):
         serializer.is_valid(raise_exception=True)
 
         shipping_address = serializer.validated_data["shipping_address"]
-        billing_address = (
-            serializer.validated_data["billing_address"] or shipping_address
-        )
+        billing_address = serializer.validated_data["billing_address"] or shipping_address
 
         try:
-            cart = Cart.objects.prefetch_related("items__product").get(
-                user=request.user
-            )
+            cart = Cart.objects.prefetch_related("items__product").get(user=request.user)
         except Cart.DoesNotExist:
             raise ValidationError("You have no active cart.")
 
@@ -131,16 +122,13 @@ class OrderListCreateView(APIView):
             # Concurrent checkouts block here until the first transaction commits,
             # then re-read the committed stock value -- preventing overselling.
             locked_products = {
-                p.id: p
-                for p in Product.objects.select_for_update().filter(id__in=product_ids)
+                p.id: p for p in Product.objects.select_for_update().filter(id__in=product_ids)
             }
 
             for item in cart_items:
                 product = locked_products[item.product_id]
                 if not product.is_active or product.is_deleted:
-                    raise ValidationError(
-                        f"'{product.name}' is no longer available."
-                    )
+                    raise ValidationError(f"'{product.name}' is no longer available.")
                 if item.quantity > product.stock:
                     raise ValidationError(
                         f"Only {product.stock} unit(s) of '{product.name}' in stock."
@@ -220,9 +208,7 @@ class OrderDetailView(APIView):
             raise ValidationError("This order is already cancelled.")
 
         if not _can_user_cancel(order, request.user):
-            raise PermissionDenied(
-                "The 24-hour cancellation window has passed for this order."
-            )
+            raise PermissionDenied("The 24-hour cancellation window has passed for this order.")
 
         with transaction.atomic():
             # Restore stock for every item.

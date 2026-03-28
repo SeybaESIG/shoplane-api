@@ -8,11 +8,11 @@ Only CONFIRMED orders are included when using --source db.
 
 --source csv expects a CSV with at least: created_at, total_price, status
 """
+
 from collections import defaultdict
 from datetime import datetime, timedelta
 from decimal import Decimal, InvalidOperation
 
-from django.core.management.base import CommandError
 from django.db.models import Count, DecimalField, Sum
 from django.db.models.functions import TruncDay, TruncMonth, TruncWeek
 
@@ -92,7 +92,4 @@ class Command(AnalyticsCommand):
                 buckets[key]["count"] += 1
             except (InvalidOperation, ValueError):
                 pass
-        return [
-            [key, buckets[key]["total"], buckets[key]["count"]]
-            for key in sorted(buckets)
-        ]
+        return [[key, buckets[key]["total"], buckets[key]["count"]] for key in sorted(buckets)]

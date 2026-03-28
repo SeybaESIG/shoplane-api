@@ -9,20 +9,22 @@ from .api.responses import success_response
 
 
 @extend_schema(
-    responses={200: inline_serializer(
-        name="HealthResponse",
-        fields={
-            "success": serializers.BooleanField(default=True),
-            "message": serializers.CharField(),
-            "data": inline_serializer(
-                name="HealthData",
-                fields={
-                    "service": serializers.CharField(),
-                    "status": serializers.CharField(),
-                },
-            ),
-        },
-    )},
+    responses={
+        200: inline_serializer(
+            name="HealthResponse",
+            fields={
+                "success": serializers.BooleanField(default=True),
+                "message": serializers.CharField(),
+                "data": inline_serializer(
+                    name="HealthData",
+                    fields={
+                        "service": serializers.CharField(),
+                        "status": serializers.CharField(),
+                    },
+                ),
+            },
+        )
+    },
     summary="Health check",
     tags=["health"],
 )

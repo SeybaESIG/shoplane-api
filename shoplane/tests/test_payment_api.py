@@ -4,7 +4,16 @@ import pytest
 from django.urls import reverse
 from rest_framework.test import APIClient
 
-from shoplane.models import Cart, Order, OrderStatus, Payment, PaymentLog, PaymentLogEventType, PaymentProvider, PaymentStatus
+from shoplane.models import (
+    Cart,
+    Order,
+    OrderStatus,
+    Payment,
+    PaymentLog,
+    PaymentLogEventType,
+    PaymentProvider,
+    PaymentStatus,
+)
 
 
 @pytest.fixture
@@ -53,6 +62,7 @@ def stripe_payload():
 # POST /orders/{order_number}/payment/ -- initiate payment
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.django_db
 def test_initiate_payment_with_stripe(auth_client, pending_order, stripe_payload):
     response = auth_client.post(
@@ -95,10 +105,14 @@ def test_initiate_payment_requires_auth(client, pending_order, stripe_payload):
 def test_initiate_payment_on_other_users_order_returns_404(pending_order, stripe_payload):
     """Non-owner gets 404 to avoid leaking order existence."""
     from uuid import uuid4
+
     from shoplane.models import User
+
     stranger = User.objects.create_user(
         email=f"stranger-{uuid4().hex[:6]}@example.com",
-        password="StrongPass123!", first_name="S", last_name="T",
+        password="StrongPass123!",
+        first_name="S",
+        last_name="T",
     )
     c = APIClient()
     c.force_authenticate(user=stranger)
@@ -124,7 +138,9 @@ def test_initiate_payment_duplicate_returns_409(auth_client, pending_order, stri
 
 
 @pytest.mark.django_db
-def test_initiate_payment_on_cancelled_order_returns_400(auth_client, pending_order, stripe_payload):
+def test_initiate_payment_on_cancelled_order_returns_400(
+    auth_client, pending_order, stripe_payload
+):
     pending_order.status = OrderStatus.CANCELLED
     pending_order.save()
     response = auth_client.post(
@@ -156,6 +172,7 @@ def test_initiate_payment_missing_provider_returns_400(auth_client, pending_orde
 # GET /orders/{order_number}/payment/ -- retrieve payment
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.django_db
 def test_retrieve_payment(auth_client, pending_order, stripe_payload):
     auth_client.post(
@@ -179,23 +196,20 @@ def test_retrieve_payment_before_initiation_returns_404(auth_client, pending_ord
 
 @pytest.mark.django_db
 def test_retrieve_payment_requires_auth(client, pending_order):
-    response = client.get(
-        reverse("payment", kwargs={"order_number": pending_order.order_number})
-    )
+    response = client.get(reverse("payment", kwargs={"order_number": pending_order.order_number}))
     assert response.status_code == 401
 
 
 @pytest.mark.django_db
 def test_retrieve_payment_for_nonexistent_order_returns_404(auth_client):
-    response = auth_client.get(
-        reverse("payment", kwargs={"order_number": "ORD-DOESNOTEXIST"})
-    )
+    response = auth_client.get(reverse("payment", kwargs={"order_number": "ORD-DOESNOTEXIST"}))
     assert response.status_code == 404
 
 
 # ---------------------------------------------------------------------------
 # GET /orders/{order_number}/payment/logs/ -- payment logs (admin only)
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.django_db
 def test_get_payment_logs_as_admin(admin_client, pending_order, admin_user):

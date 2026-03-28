@@ -10,8 +10,9 @@ from shoplane.models import Category, Order, OrderItem, OrderStatus, Product
 
 def _make_confirmed_order(user, product, quantity, unit_price, total, days_ago=0):
     """Create a CONFIRMED order with one item, optionally backdated."""
-    from django.utils import timezone
     from datetime import timedelta
+
+    from django.utils import timezone
 
     suffix = uuid4().hex[:8]
     order = Order.objects.create(
@@ -54,12 +55,20 @@ class TestTopProducts:
 
         s1, s2 = uuid4().hex[:6], uuid4().hex[:6]
         self.p1 = Product.objects.create(
-            name=f"Popular {s1}", slug=f"popular-{s1}",
-            category=category, price=Decimal("10.00"), stock=100, updated_by=user,
+            name=f"Popular {s1}",
+            slug=f"popular-{s1}",
+            category=category,
+            price=Decimal("10.00"),
+            stock=100,
+            updated_by=user,
         )
         self.p2 = Product.objects.create(
-            name=f"Niche {s2}", slug=f"niche-{s2}",
-            category=category, price=Decimal("10.00"), stock=100, updated_by=user,
+            name=f"Niche {s2}",
+            slug=f"niche-{s2}",
+            category=category,
+            price=Decimal("10.00"),
+            stock=100,
+            updated_by=user,
         )
 
     def test_returns_200(self):
@@ -92,8 +101,11 @@ class TestTopProducts:
             status=OrderStatus.PENDING,
         )
         OrderItem.objects.create(
-            order=pending_order, product=self.p2,
-            quantity=100, unit_price=Decimal("10"), subtotal=Decimal("1000"),
+            order=pending_order,
+            product=self.p2,
+            quantity=100,
+            unit_price=Decimal("10"),
+            subtotal=Decimal("1000"),
         )
         _make_confirmed_order(self.user, self.p1, quantity=1, unit_price="10", total="10")
 
@@ -106,8 +118,12 @@ class TestTopProducts:
         for i in range(5):
             s = uuid4().hex[:6]
             p = Product.objects.create(
-                name=f"Extra {s}", slug=f"extra-{s}",
-                category=Category.objects.first(), price=Decimal("5"), stock=10, updated_by=self.user,
+                name=f"Extra {s}",
+                slug=f"extra-{s}",
+                category=Category.objects.first(),
+                price=Decimal("5"),
+                stock=10,
+                updated_by=self.user,
             )
             _make_confirmed_order(self.user, p, quantity=1, unit_price="5", total="5")
 
@@ -142,8 +158,12 @@ class TestSalesStats:
 
         s = uuid4().hex[:6]
         self.product = Product.objects.create(
-            name=f"Prod {s}", slug=f"prod-{s}",
-            category=category, price=Decimal("10.00"), stock=100, updated_by=user,
+            name=f"Prod {s}",
+            slug=f"prod-{s}",
+            category=category,
+            price=Decimal("10.00"),
+            stock=100,
+            updated_by=user,
         )
 
     def test_returns_200_with_day_period(self):
@@ -185,12 +205,13 @@ class TestSalesStats:
         assert data == []
 
     def test_date_range_filter(self):
-        old_order = _make_confirmed_order(
+        _make_confirmed_order(
             self.user, self.product, quantity=1, unit_price="10", total="99.00", days_ago=10
         )
         _make_confirmed_order(self.user, self.product, quantity=1, unit_price="10", total="1.00")
 
         from django.utils import timezone
+
         today_str = timezone.now().date().isoformat()
         data = self.admin.get(
             reverse("stats-sales"), {"period": "day", "from": today_str, "to": today_str}
@@ -238,8 +259,12 @@ class TestAverageCart:
 
         s = uuid4().hex[:6]
         self.product = Product.objects.create(
-            name=f"Prod {s}", slug=f"prod-{s}",
-            category=category, price=Decimal("10.00"), stock=100, updated_by=user,
+            name=f"Prod {s}",
+            slug=f"prod-{s}",
+            category=category,
+            price=Decimal("10.00"),
+            stock=100,
+            updated_by=user,
         )
 
     def test_returns_200(self):
@@ -287,10 +312,13 @@ class TestAverageCart:
         assert response.status_code == 400
 
     def test_date_range_filter(self):
-        _make_confirmed_order(self.user, self.product, quantity=1, unit_price="10", total="99.00", days_ago=10)
+        _make_confirmed_order(
+            self.user, self.product, quantity=1, unit_price="10", total="99.00", days_ago=10
+        )
         _make_confirmed_order(self.user, self.product, quantity=1, unit_price="10", total="10.00")
 
         from django.utils import timezone
+
         today_str = timezone.now().date().isoformat()
         data = self.admin.get(
             reverse("stats-average-cart"), {"from": today_str, "to": today_str}
@@ -323,8 +351,12 @@ class TestOrdersPerCustomer:
 
         s = uuid4().hex[:6]
         self.product = Product.objects.create(
-            name=f"Prod {s}", slug=f"prod-{s}",
-            category=category, price=Decimal("10.00"), stock=100, updated_by=user,
+            name=f"Prod {s}",
+            slug=f"prod-{s}",
+            category=category,
+            price=Decimal("10.00"),
+            stock=100,
+            updated_by=user,
         )
 
         # Second user for multi-customer scenarios
@@ -332,7 +364,8 @@ class TestOrdersPerCustomer:
         self.user2 = User.objects.create_user(
             email=f"user2-{suffix}@example.com",
             password="StrongPass123!",
-            first_name="B", last_name="User",
+            first_name="B",
+            last_name="User",
         )
 
     def test_returns_200(self):
@@ -380,10 +413,13 @@ class TestOrdersPerCustomer:
         assert data["total_customers"] == 0
 
     def test_date_range_filter(self):
-        _make_confirmed_order(self.user, self.product, quantity=1, unit_price="10", total="10", days_ago=10)
+        _make_confirmed_order(
+            self.user, self.product, quantity=1, unit_price="10", total="10", days_ago=10
+        )
         _make_confirmed_order(self.user2, self.product, quantity=1, unit_price="10", total="10")
 
         from django.utils import timezone
+
         today_str = timezone.now().date().isoformat()
         data = self.admin.get(
             reverse("stats-orders-per-customer"), {"from": today_str, "to": today_str}
@@ -416,15 +452,20 @@ class TestCustomerRecurrence:
 
         s = uuid4().hex[:6]
         self.product = Product.objects.create(
-            name=f"Prod {s}", slug=f"prod-{s}",
-            category=category, price=Decimal("10.00"), stock=100, updated_by=user,
+            name=f"Prod {s}",
+            slug=f"prod-{s}",
+            category=category,
+            price=Decimal("10.00"),
+            stock=100,
+            updated_by=user,
         )
 
         suffix = uuid4().hex[:6]
         self.user2 = User.objects.create_user(
             email=f"user2-{suffix}@example.com",
             password="StrongPass123!",
-            first_name="C", last_name="User",
+            first_name="C",
+            last_name="User",
         )
 
     def test_returns_200(self):
@@ -482,10 +523,13 @@ class TestCustomerRecurrence:
 
     def test_date_range_filter(self):
         # user1 ordered 10 days ago, user2 ordered today
-        _make_confirmed_order(self.user, self.product, quantity=1, unit_price="10", total="10", days_ago=10)
+        _make_confirmed_order(
+            self.user, self.product, quantity=1, unit_price="10", total="10", days_ago=10
+        )
         _make_confirmed_order(self.user2, self.product, quantity=1, unit_price="10", total="10")
 
         from django.utils import timezone
+
         today_str = timezone.now().date().isoformat()
         data = self.admin.get(
             reverse("stats-customer-recurrence"), {"from": today_str, "to": today_str}

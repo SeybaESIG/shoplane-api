@@ -2,9 +2,9 @@ from decimal import Decimal
 from uuid import uuid4
 
 import pytest
+from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 from django.db.models.deletion import ProtectedError
-from django.core.exceptions import ValidationError
 
 from shoplane.models import Order, OrderItem, OrderStatus
 

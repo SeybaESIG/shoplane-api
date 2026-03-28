@@ -28,6 +28,7 @@ def admin_client(admin_user):
 # LIST
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.django_db
 def test_list_categories_is_public(client, category):
     response = client.get(reverse("category-list"))
@@ -49,6 +50,7 @@ def test_list_only_returns_active_categories(client, user):
 # ---------------------------------------------------------------------------
 # RETRIEVE
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.django_db
 def test_retrieve_category_is_public(client, category):
@@ -73,6 +75,7 @@ def test_retrieve_nonexistent_category_returns_404(client):
 # ---------------------------------------------------------------------------
 # CREATE
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.django_db
 def test_create_category_as_admin(admin_client):
@@ -115,6 +118,7 @@ def test_create_category_without_name_is_rejected(admin_client):
 # PARTIAL UPDATE
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.django_db
 def test_update_category_as_admin(admin_client, category):
     response = admin_client.patch(
@@ -148,6 +152,7 @@ def test_update_category_name_duplicate_rejected(admin_client, user):
 # ---------------------------------------------------------------------------
 # DELETE
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.django_db
 def test_delete_category_as_admin(admin_client, user):

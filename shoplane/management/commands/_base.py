@@ -5,6 +5,7 @@ Every command that accepts --source db|csv, --from/--to date range,
 and --output stdout|csv --file <path> inherits from AnalyticsCommand
 and implements run(options) -> (header, rows).
 """
+
 import csv
 from datetime import date
 
@@ -25,20 +26,18 @@ class AnalyticsCommand(BaseCommand):
             choices=["db", "csv"],
             default="db",
             help="Data source: 'db' queries the database directly (default); "
-                 "'csv' reads from a previously exported CSV file.",
+            "'csv' reads from a previously exported CSV file.",
         )
         parser.add_argument(
             "--file",
             default=None,
-            help="Path to the input CSV when --source csv, "
-                 "or the output CSV when --output csv.",
+            help="Path to the input CSV when --source csv, or the output CSV when --output csv.",
         )
         parser.add_argument(
             "--output",
             choices=["stdout", "csv"],
             default="stdout",
-            help="Output format: 'stdout' prints a table (default); "
-                 "'csv' writes to --file.",
+            help="Output format: 'stdout' prints a table (default); 'csv' writes to --file.",
         )
         parser.add_argument(
             "--from",
@@ -77,9 +76,7 @@ class AnalyticsCommand(BaseCommand):
         try:
             return date.fromisoformat(value)
         except ValueError:
-            raise CommandError(
-                f"Invalid date '{value}' for --{param_name}. Expected YYYY-MM-DD."
-            )
+            raise CommandError(f"Invalid date '{value}' for --{param_name}. Expected YYYY-MM-DD.")
 
     def apply_date_range(self, queryset, options, field="created_at"):
         date_from = self.parse_date(options.get("date_from"), "from")
@@ -106,8 +103,7 @@ class AnalyticsCommand(BaseCommand):
             self.stdout.write("(no data)")
             return
         col_widths = [
-            max(len(str(header[i])), *(len(str(r[i])) for r in rows))
-            for i in range(len(header))
+            max(len(str(header[i])), *(len(str(r[i])) for r in rows)) for i in range(len(header))
         ]
         fmt = "  ".join(f"{{:<{w}}}" for w in col_widths)
         separator = "  ".join("-" * w for w in col_widths)

@@ -8,8 +8,8 @@ and the mean order count per customer.
 
 --source csv expects a CSV with at least: user_email, status
 """
+
 from collections import Counter, defaultdict
-from decimal import Decimal
 
 from django.db.models import Count
 
@@ -53,9 +53,7 @@ class Command(AnalyticsCommand):
         qs = Order.objects.filter(status=OrderStatus.CONFIRMED)
         qs = self.apply_date_range(qs, options)
 
-        per_user = list(
-            qs.values("user_id").annotate(order_count=Count("id"))
-        )
+        per_user = list(qs.values("user_id").annotate(order_count=Count("id")))
         if not per_user:
             return Counter(), 0, None
 

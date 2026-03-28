@@ -8,6 +8,7 @@ Covers:
   - Expired JWT access token returns 401
   - Response envelope format consistency across all error codes
 """
+
 from datetime import timedelta
 from decimal import Decimal
 
@@ -20,17 +21,15 @@ from rest_framework.test import APIClient
 from shoplane.models import (
     Cart,
     CartItem,
-    Category,
-    Order,
     OrderItem,
     Product,
     User,
 )
 
-
 # ---------------------------------------------------------------------------
 # DB constraint: CartItem quantity >= 1
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.django_db
 def test_cart_item_quantity_zero_violates_constraint(cart, product):
@@ -50,6 +49,7 @@ def test_cart_item_quantity_zero_violates_constraint(cart, product):
 # DB constraint: OrderItem quantity >= 1
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.django_db
 def test_order_item_quantity_zero_violates_constraint(order, product):
     """DB must reject an OrderItem with quantity=0."""
@@ -68,6 +68,7 @@ def test_order_item_quantity_zero_violates_constraint(order, product):
 # DB constraint: Product stock >= 0
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.django_db
 def test_product_stock_cannot_go_negative(product):
     """DB must reject a product stock update that would result in a negative value."""
@@ -80,6 +81,7 @@ def test_product_stock_cannot_go_negative(product):
 # ---------------------------------------------------------------------------
 # Cart.add_product() boundary conditions
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.django_db
 def test_add_product_with_zero_quantity_raises_value_error(cart, product):
@@ -116,6 +118,7 @@ def test_add_product_second_call_accumulates_quantity(cart, product):
 # Order checkout: product deactivated or soft-deleted after add-to-cart
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture
 def checkout_client(user):
     c = APIClient()
@@ -124,7 +127,9 @@ def checkout_client(user):
 
 
 @pytest.mark.django_db
-def test_checkout_blocked_when_product_becomes_inactive(checkout_client, user, category, admin_user):
+def test_checkout_blocked_when_product_becomes_inactive(
+    checkout_client, user, category, admin_user
+):
     """
     If a product is deactivated between add-to-cart and checkout,
     the order creation must be rejected with 400.
@@ -143,9 +148,7 @@ def test_checkout_blocked_when_product_becomes_inactive(checkout_client, user, c
     p.is_active = False
     p.save(update_fields=["is_active"])
 
-    response = checkout_client.post(
-        reverse("order-list"), {"shipping_address": "5 Test Rd"}
-    )
+    response = checkout_client.post(reverse("order-list"), {"shipping_address": "5 Test Rd"})
     assert response.status_code == 400
 
 
@@ -169,15 +172,14 @@ def test_checkout_blocked_when_product_is_soft_deleted(checkout_client, user, ca
     p.is_deleted = True
     p.save(update_fields=["is_deleted"])
 
-    response = checkout_client.post(
-        reverse("order-list"), {"shipping_address": "5 Test Rd"}
-    )
+    response = checkout_client.post(reverse("order-list"), {"shipping_address": "5 Test Rd"})
     assert response.status_code == 400
 
 
 # ---------------------------------------------------------------------------
 # Expired JWT access token → 401
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.django_db
 def test_expired_access_token_returns_401():
@@ -207,6 +209,7 @@ def test_expired_access_token_returns_401():
 # Response envelope consistency across error codes
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.django_db
 def test_401_error_uses_envelope_format():
     client = APIClient()
@@ -232,9 +235,7 @@ def test_403_error_uses_envelope_format(user):
 def test_404_error_uses_envelope_format(user):
     client = APIClient()
     client.force_authenticate(user=user)
-    response = client.get(
-        reverse("order-detail", kwargs={"order_number": "ORD-DOESNOTEXIST"})
-    )
+    response = client.get(reverse("order-detail", kwargs={"order_number": "ORD-DOESNOTEXIST"}))
     assert response.status_code == 404
     body = response.json()
     assert body["success"] is False

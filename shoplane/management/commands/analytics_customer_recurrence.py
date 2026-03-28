@@ -8,6 +8,7 @@ selected window) and returning customers (2+ orders in the window).
 
 --source csv expects a CSV with at least: user_email, status
 """
+
 from collections import defaultdict
 
 from django.db.models import Count

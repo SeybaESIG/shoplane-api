@@ -23,9 +23,12 @@ def auth_client(user):
 def other_client(django_db_setup):
     """A second authenticated user with their own client."""
     from shoplane.models import User
+
     other = User.objects.create_user(
-        email="other@example.com", password="StrongPass123!",
-        first_name="Other", last_name="User",
+        email="other@example.com",
+        password="StrongPass123!",
+        first_name="Other",
+        last_name="User",
     )
     c = APIClient()
     c.force_authenticate(user=other)
@@ -35,6 +38,7 @@ def other_client(django_db_setup):
 # ---------------------------------------------------------------------------
 # GET /cart/
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.django_db
 def test_get_cart_auto_creates_cart(auth_client):
@@ -66,6 +70,7 @@ def test_get_cart_returns_items(auth_client, user, product):
 # ---------------------------------------------------------------------------
 # POST /cart/items/ -- add item
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.django_db
 def test_add_item_to_cart(auth_client, product):
@@ -114,9 +119,14 @@ def test_add_nonexistent_product_returns_400(auth_client):
 @pytest.mark.django_db
 def test_add_inactive_product_returns_400(auth_client, category, user):
     from shoplane.models import Product
+
     inactive = Product.objects.create(
-        name="Inactive Item", category=category,
-        price=Decimal("5.00"), stock=10, is_active=False, updated_by=user,
+        name="Inactive Item",
+        category=category,
+        price=Decimal("5.00"),
+        stock=10,
+        is_active=False,
+        updated_by=user,
     )
     response = auth_client.post(
         reverse("cart-item-add"),
@@ -159,6 +169,7 @@ def test_add_item_to_submitted_cart_returns_403(auth_client, user, product):
 # ---------------------------------------------------------------------------
 # PATCH /cart/items/{product_slug}/ -- update quantity
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.django_db
 def test_update_item_quantity(auth_client, user, product):
@@ -219,6 +230,7 @@ def test_update_item_requires_auth(client, product):
 # DELETE /cart/items/{product_slug}/ -- remove item
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.django_db
 def test_remove_item_from_cart(auth_client, user, product):
     cart = Cart.objects.get_or_create(user=user)[0]
@@ -241,15 +253,14 @@ def test_remove_nonexistent_item_returns_404(auth_client, product):
 
 @pytest.mark.django_db
 def test_remove_item_requires_auth(client, product):
-    response = client.delete(
-        reverse("cart-item-detail", kwargs={"product_slug": product.slug})
-    )
+    response = client.delete(reverse("cart-item-detail", kwargs={"product_slug": product.slug}))
     assert response.status_code == 401
 
 
 # ---------------------------------------------------------------------------
 # DELETE /cart/ -- clear cart
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.django_db
 def test_clear_cart(auth_client, user, product):

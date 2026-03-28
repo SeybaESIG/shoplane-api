@@ -42,6 +42,7 @@ def product_payload(category):
 # LIST
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.django_db
 def test_list_products_is_public(client, product):
     response = client.get(reverse("product-list"))
@@ -53,8 +54,12 @@ def test_list_products_is_public(client, product):
 @pytest.mark.django_db
 def test_list_excludes_inactive_products(client, category, user):
     inactive = Product.objects.create(
-        name="Inactive Product", category=category,
-        price=Decimal("9.99"), stock=5, is_active=False, updated_by=user,
+        name="Inactive Product",
+        category=category,
+        price=Decimal("9.99"),
+        stock=5,
+        is_active=False,
+        updated_by=user,
     )
     response = client.get(reverse("product-list"))
     slugs = [p["slug"] for p in response.data["data"]]
@@ -64,8 +69,12 @@ def test_list_excludes_inactive_products(client, category, user):
 @pytest.mark.django_db
 def test_list_excludes_soft_deleted_products(client, category, user):
     deleted = Product.objects.create(
-        name="Deleted Product", category=category,
-        price=Decimal("9.99"), stock=5, is_deleted=True, updated_by=user,
+        name="Deleted Product",
+        category=category,
+        price=Decimal("9.99"),
+        stock=5,
+        is_deleted=True,
+        updated_by=user,
     )
     response = client.get(reverse("product-list"))
     slugs = [p["slug"] for p in response.data["data"]]
@@ -76,8 +85,12 @@ def test_list_excludes_soft_deleted_products(client, category, user):
 def test_list_admin_all_param_returns_all_products(admin_client, category, admin_user):
     """Admin with ?all=true should see inactive and soft-deleted products."""
     inactive = Product.objects.create(
-        name="Invisible Product", category=category,
-        price=Decimal("9.99"), stock=5, is_active=False, updated_by=admin_user,
+        name="Invisible Product",
+        category=category,
+        price=Decimal("9.99"),
+        stock=5,
+        is_active=False,
+        updated_by=admin_user,
     )
     response = admin_client.get(reverse("product-list") + "?all=true")
     slugs = [p["slug"] for p in response.data["data"]]
@@ -87,6 +100,7 @@ def test_list_admin_all_param_returns_all_products(admin_client, category, admin
 # ---------------------------------------------------------------------------
 # RETRIEVE
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.django_db
 def test_retrieve_product_is_public(client, product):
@@ -98,8 +112,12 @@ def test_retrieve_product_is_public(client, product):
 @pytest.mark.django_db
 def test_retrieve_inactive_product_returns_404_for_public(client, category, user):
     p = Product.objects.create(
-        name="Hidden Product", category=category,
-        price=Decimal("9.99"), stock=5, is_active=False, updated_by=user,
+        name="Hidden Product",
+        category=category,
+        price=Decimal("9.99"),
+        stock=5,
+        is_active=False,
+        updated_by=user,
     )
     response = client.get(reverse("product-detail", kwargs={"slug": p.slug}))
     assert response.status_code == 404
@@ -108,8 +126,12 @@ def test_retrieve_inactive_product_returns_404_for_public(client, category, user
 @pytest.mark.django_db
 def test_retrieve_soft_deleted_product_returns_404_for_public(client, category, user):
     p = Product.objects.create(
-        name="Gone Product", category=category,
-        price=Decimal("9.99"), stock=5, is_deleted=True, updated_by=user,
+        name="Gone Product",
+        category=category,
+        price=Decimal("9.99"),
+        stock=5,
+        is_deleted=True,
+        updated_by=user,
     )
     response = client.get(reverse("product-detail", kwargs={"slug": p.slug}))
     assert response.status_code == 404
@@ -124,8 +146,12 @@ def test_retrieve_nonexistent_product_returns_404(client):
 @pytest.mark.django_db
 def test_retrieve_soft_deleted_product_visible_to_admin(admin_client, category, admin_user):
     p = Product.objects.create(
-        name="Admin Visible", category=category,
-        price=Decimal("9.99"), stock=5, is_deleted=True, updated_by=admin_user,
+        name="Admin Visible",
+        category=category,
+        price=Decimal("9.99"),
+        stock=5,
+        is_deleted=True,
+        updated_by=admin_user,
     )
     response = admin_client.get(reverse("product-detail", kwargs={"slug": p.slug}))
     assert response.status_code == 200
@@ -134,6 +160,7 @@ def test_retrieve_soft_deleted_product_visible_to_admin(admin_client, category, 
 # ---------------------------------------------------------------------------
 # CREATE
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.django_db
 def test_create_product_as_admin(admin_client, product_payload):
@@ -188,6 +215,7 @@ def test_create_product_missing_required_fields(admin_client):
 # PARTIAL UPDATE
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.django_db
 def test_update_product_as_admin(admin_client, product):
     response = admin_client.patch(
@@ -234,9 +262,11 @@ def test_update_product_negative_stock_rejected(admin_client, product):
     )
     assert response.status_code == 400
 
+
 # ---------------------------------------------------------------------------
 # SOFT DELETE
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.django_db
 def test_soft_delete_product_as_admin(admin_client, product):

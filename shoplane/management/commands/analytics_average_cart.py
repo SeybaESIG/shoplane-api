@@ -9,14 +9,15 @@ With --period: breaks the average down per period.
 
 --source csv expects a CSV with at least: created_at, total_price, status
 """
+
 from collections import defaultdict
 from datetime import datetime, timedelta
 from decimal import Decimal, InvalidOperation
 
 from django.db.models import Avg, Count, DecimalField
+from django.db.models.functions import TruncDay, TruncMonth, TruncWeek
 
 from shoplane.models import Order, OrderStatus
-from django.db.models.functions import TruncDay, TruncMonth, TruncWeek
 
 from ._base import AnalyticsCommand
 

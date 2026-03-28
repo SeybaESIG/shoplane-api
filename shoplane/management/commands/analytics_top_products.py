@@ -7,9 +7,9 @@ Reports the best-selling products by total quantity sold from CONFIRMED orders.
 --source csv expects a CSV with at least these columns:
     product_slug, product_name, quantity
 """
+
 from collections import defaultdict
 
-from django.core.management.base import CommandError
 from django.db.models import Sum
 
 from shoplane.models import OrderItem, OrderStatus
@@ -44,20 +44,14 @@ class Command(AnalyticsCommand):
         return header, [[i + 1] + list(r) for i, r in enumerate(rows)]
 
     def _from_db(self, options, limit):
-        qs = (
-            OrderItem.objects
-            .filter(order__status=OrderStatus.CONFIRMED)
-        )
+        qs = OrderItem.objects.filter(order__status=OrderStatus.CONFIRMED)
         qs = self.apply_date_range(qs, options, field="order__created_at")
         results = (
             qs.values("product__slug", "product__name")
             .annotate(total_quantity=Sum("quantity"))
             .order_by("-total_quantity")[:limit]
         )
-        return [
-            [r["product__slug"], r["product__name"], r["total_quantity"]]
-            for r in results
-        ]
+        return [[r["product__slug"], r["product__name"], r["total_quantity"]] for r in results]
 
     def _from_csv(self, options, limit):
         records = self.read_csv(options)

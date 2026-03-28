@@ -21,6 +21,7 @@ def auth_client(user):
 # GET /users/me/
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.django_db
 def test_get_profile_returns_own_data(auth_client, user):
     response = auth_client.get(reverse("user-me"))
@@ -49,13 +50,23 @@ def test_get_profile_excludes_sensitive_fields(auth_client):
 def test_get_profile_includes_expected_fields(auth_client):
     response = auth_client.get(reverse("user-me"))
     data = response.data["data"]
-    for field in ["id", "email", "first_name", "last_name", "address", "role", "is_active", "created_at"]:
+    for field in [
+        "id",
+        "email",
+        "first_name",
+        "last_name",
+        "address",
+        "role",
+        "is_active",
+        "created_at",
+    ]:
         assert field in data
 
 
 # ---------------------------------------------------------------------------
 # PATCH /users/me/
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.django_db
 def test_update_first_name(auth_client, user):
@@ -91,8 +102,10 @@ def test_update_email_normalised_to_lowercase(auth_client):
 def test_update_email_duplicate_rejected(auth_client, user):
     """Cannot claim another user's email."""
     other = User.objects.create_user(
-        email="taken@example.com", password="StrongPass123!",
-        first_name="Other", last_name="User",
+        email="taken@example.com",
+        password="StrongPass123!",
+        first_name="Other",
+        last_name="User",
     )
     response = auth_client.patch(reverse("user-me"), {"email": other.email})
     assert response.status_code == 400

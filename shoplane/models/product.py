@@ -38,9 +38,7 @@ class Product(TimeStampedModel):
     stock = models.PositiveIntegerField(default=0)
     is_active = models.BooleanField(default=True)
     is_deleted = models.BooleanField(default=False)
-    category = models.ForeignKey(
-        Category, related_name="products", on_delete=models.PROTECT
-    )
+    category = models.ForeignKey(Category, related_name="products", on_delete=models.PROTECT)
     updated_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         related_name="updated_products",
@@ -52,12 +50,8 @@ class Product(TimeStampedModel):
     class Meta:
         ordering = ["name", "id"]
         constraints = [
-            models.CheckConstraint(
-                condition=models.Q(price__gte=0), name="product_price_gte_0"
-            ),
-            models.CheckConstraint(
-                condition=models.Q(stock__gte=0), name="product_stock_gte_0"
-            ),
+            models.CheckConstraint(condition=models.Q(price__gte=0), name="product_price_gte_0"),
+            models.CheckConstraint(condition=models.Q(stock__gte=0), name="product_stock_gte_0"),
         ]
         indexes = [
             models.Index(fields=["is_active", "is_deleted"], name="product_active_deleted_idx"),

@@ -7,7 +7,6 @@ query parameters, and returns the filtered/ordered queryset.
 
 from decimal import Decimal, InvalidOperation
 
-
 # ---------------------------------------------------------------------------
 # Allowed ordering fields per resource. Prefix with '-' for descending.
 # ---------------------------------------------------------------------------

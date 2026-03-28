@@ -19,7 +19,6 @@ from rest_framework.test import APIClient
 
 from shoplane.models import Cart, CartItem, Category, Product
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -89,9 +88,7 @@ class TestProductListQueryCount:
 
         assert response.status_code == 200
         # Ceiling: pagination count query + main SELECT (with JOIN) = at most 5
-        assert len(ctx) <= 5, (
-            f"Expected ≤5 queries for product list, got {len(ctx)}."
-        )
+        assert len(ctx) <= 5, f"Expected ≤5 queries for product list, got {len(ctx)}."
 
 
 # ---------------------------------------------------------------------------
@@ -106,20 +103,25 @@ class TestCartRetrieveQueryCount:
         Retrieving a cart with N items must execute a constant number of queries.
         Without prefetch_related("items__product") this would be 1 + N (one per item).
         """
-        category = Category.objects.create(
-            name=f"Cat {uuid4().hex[:6]}", updated_by=user
-        )
+        category = Category.objects.create(name=f"Cat {uuid4().hex[:6]}", updated_by=user)
         cart = Cart.objects.create(user=user)
 
         for i in range(5):
             s = uuid4().hex[:6]
             product = Product.objects.create(
-                name=f"Item {s}", slug=f"item-{s}", category=category,
-                price=Decimal("9.99"), stock=20, updated_by=user,
+                name=f"Item {s}",
+                slug=f"item-{s}",
+                category=category,
+                price=Decimal("9.99"),
+                stock=20,
+                updated_by=user,
             )
             CartItem.objects.create(
-                cart=cart, product=product, quantity=1,
-                unit_price=product.price, subtotal=product.price,
+                cart=cart,
+                product=product,
+                quantity=1,
+                unit_price=product.price,
+                subtotal=product.price,
             )
 
         client = APIClient()
@@ -134,12 +136,19 @@ class TestCartRetrieveQueryCount:
         for i in range(5):
             s = uuid4().hex[:6]
             product = Product.objects.create(
-                name=f"Item2 {s}", slug=f"item2-{s}", category=category,
-                price=Decimal("9.99"), stock=20, updated_by=user,
+                name=f"Item2 {s}",
+                slug=f"item2-{s}",
+                category=category,
+                price=Decimal("9.99"),
+                stock=20,
+                updated_by=user,
             )
             CartItem.objects.create(
-                cart=cart, product=product, quantity=1,
-                unit_price=product.price, subtotal=product.price,
+                cart=cart,
+                product=product,
+                quantity=1,
+                unit_price=product.price,
+                subtotal=product.price,
             )
 
         # Re-authenticate on a fresh client to avoid cached state.
@@ -158,20 +167,25 @@ class TestCartRetrieveQueryCount:
 
     def test_cart_retrieve_query_count_is_bounded(self, user):
         """The cart endpoint must stay within a reasonable fixed ceiling."""
-        category = Category.objects.create(
-            name=f"BoundCat {uuid4().hex[:6]}", updated_by=user
-        )
+        category = Category.objects.create(name=f"BoundCat {uuid4().hex[:6]}", updated_by=user)
         cart = Cart.objects.create(user=user)
 
         for i in range(8):
             s = uuid4().hex[:6]
             product = Product.objects.create(
-                name=f"BoundItem {s}", slug=f"bound-{s}", category=category,
-                price=Decimal("5.00"), stock=10, updated_by=user,
+                name=f"BoundItem {s}",
+                slug=f"bound-{s}",
+                category=category,
+                price=Decimal("5.00"),
+                stock=10,
+                updated_by=user,
             )
             CartItem.objects.create(
-                cart=cart, product=product, quantity=1,
-                unit_price=product.price, subtotal=product.price,
+                cart=cart,
+                product=product,
+                quantity=1,
+                unit_price=product.price,
+                subtotal=product.price,
             )
 
         client = APIClient()
@@ -182,6 +196,4 @@ class TestCartRetrieveQueryCount:
 
         assert response.status_code == 200
         # Ceiling: auth lookup + cart get_or_create + items prefetch + products prefetch = at most 8
-        assert len(ctx) <= 8, (
-            f"Expected ≤8 queries for cart retrieve, got {len(ctx)}."
-        )
+        assert len(ctx) <= 8, f"Expected ≤8 queries for cart retrieve, got {len(ctx)}."

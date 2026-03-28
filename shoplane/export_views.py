@@ -1,5 +1,4 @@
 import csv
-import io
 
 from django.db.models import Count, Sum
 from django.http import StreamingHttpResponse
@@ -92,8 +91,7 @@ class CustomerExportView(APIView):
     )
     def get(self, request):
         customers = (
-            User.objects
-            .filter(orders__isnull=False)
+            User.objects.filter(orders__isnull=False)
             .annotate(
                 order_count=Count("orders", distinct=True),
                 total_spend=Sum("orders__total_price"),

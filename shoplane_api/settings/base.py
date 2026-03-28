@@ -89,7 +89,7 @@ STATIC_URL = "static/"
 
 REST_FRAMEWORK = {
     # Secure by default: all endpoints require authentication unless a view
-    # explicitly declares AllowAny. 
+    # explicitly declares AllowAny.
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
     ],
@@ -134,6 +134,62 @@ SIMPLE_JWT = {
 AUTH_USER_MODEL = "shoplane.User"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+_SENTRY_DSN = os.getenv("SENTRY_DSN", "")
+if _SENTRY_DSN:
+    import sentry_sdk
+    from sentry_sdk.integrations.django import DjangoIntegration
+    from sentry_sdk.integrations.logging import LoggingIntegration
+
+    sentry_sdk.init(
+        dsn=_SENTRY_DSN,
+        environment=os.getenv("SENTRY_ENVIRONMENT", os.getenv("DJANGO_ENV", "dev")),
+        integrations=[
+            DjangoIntegration(transaction_style="url"),
+            LoggingIntegration(level=None, event_level="ERROR"),
+        ],
+        traces_sample_rate=float(os.getenv("SENTRY_TRACES_SAMPLE_RATE", "0.1")),
+        send_default_pii=False,
+    )
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "json": {
+            "()": "pythonjsonlogger.json.JsonFormatter",
+            "fmt": "%(asctime)s %(levelname)s %(name)s %(message)s",
+            "rename_fields": {"asctime": "timestamp", "levelname": "level"},
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "json",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": os.getenv("LOG_LEVEL", "INFO"),
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "level": os.getenv("LOG_LEVEL", "INFO"),
+            "propagate": False,
+        },
+        "django.db.backends": {
+            "handlers": ["console"],
+            "level": os.getenv("DB_LOG_LEVEL", "WARNING"),
+            "propagate": False,
+        },
+        "shoplane": {
+            "handlers": ["console"],
+            "level": os.getenv("LOG_LEVEL", "INFO"),
+            "propagate": False,
+        },
+    },
+}
 
 CACHES = {
     "default": {

@@ -34,7 +34,7 @@ def test_health_endpoint_rejects_unsupported_method():
     assert response.status_code == 405
     assert response.json() == {
         "success": False,
-        "message": "Method \"POST\" not allowed.",
+        "message": 'Method "POST" not allowed.',
         "errors": None,
         "code": "method_not_allowed",
     }

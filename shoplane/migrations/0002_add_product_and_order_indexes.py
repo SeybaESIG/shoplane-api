@@ -4,22 +4,23 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('shoplane', '0001_initial'),
+        ("shoplane", "0001_initial"),
     ]
 
     operations = [
         migrations.AddIndex(
-            model_name='order',
-            index=models.Index(fields=['status'], name='order_status_idx'),
+            model_name="order",
+            index=models.Index(fields=["status"], name="order_status_idx"),
         ),
         migrations.AddIndex(
-            model_name='order',
-            index=models.Index(fields=['-created_at'], name='order_created_at_idx'),
+            model_name="order",
+            index=models.Index(fields=["-created_at"], name="order_created_at_idx"),
         ),
         migrations.AddIndex(
-            model_name='product',
-            index=models.Index(fields=['is_active', 'is_deleted'], name='product_active_deleted_idx'),
+            model_name="product",
+            index=models.Index(
+                fields=["is_active", "is_deleted"], name="product_active_deleted_idx"
+            ),
         ),
     ]

@@ -17,9 +17,7 @@ class Cart(TimeStampedModel):
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL, related_name="cart", on_delete=models.CASCADE
     )
-    status = models.CharField(
-        max_length=20, choices=CartStatus.choices, default=CartStatus.OPEN
-    )
+    status = models.CharField(max_length=20, choices=CartStatus.choices, default=CartStatus.OPEN)
     total_price = models.DecimalField(max_digits=12, decimal_places=2, default=0)
 
     class Meta:
@@ -33,9 +31,7 @@ class Cart(TimeStampedModel):
         return f"Cart<{self.user_id}>"
 
     def recompute_total(self):
-        self.total_price = sum(
-            (item.subtotal for item in self.items.all()), Decimal("0.00")
-        )
+        self.total_price = sum((item.subtotal for item in self.items.all()), Decimal("0.00"))
         self.save(update_fields=["total_price"])
         return self.total_price
 
@@ -64,18 +60,14 @@ class Cart(TimeStampedModel):
 
 class CartItem(TimeStampedModel):
     cart = models.ForeignKey(Cart, related_name="items", on_delete=models.CASCADE)
-    product = models.ForeignKey(
-        Product, related_name="cart_items", on_delete=models.PROTECT
-    )
+    product = models.ForeignKey(Product, related_name="cart_items", on_delete=models.PROTECT)
     quantity = models.PositiveIntegerField(default=1)
     unit_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     subtotal = models.DecimalField(max_digits=12, decimal_places=2, default=0)
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(
-                fields=["cart", "product"], name="unique_cart_product"
-            ),
+            models.UniqueConstraint(fields=["cart", "product"], name="unique_cart_product"),
             models.CheckConstraint(
                 condition=models.Q(quantity__gte=1), name="cart_item_quantity_gte_1"
             ),

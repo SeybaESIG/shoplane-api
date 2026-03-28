@@ -4,18 +4,28 @@ from .auth_views import JWTLoginView, JWTLogoutView, JWTRefreshView, JWTVerifyVi
 from .cart_views import CartItemView, CartView
 from .category_views import CategoryViewSet
 from .export_views import CustomerExportView, OrderExportView
-from .stats_views import AverageCartView, CustomerRecurrenceView, OrdersPerCustomerView, SalesStatsView, TopProductsView
 from .order_views import OrderDetailView, OrderListCreateView
 from .payment_views import PaymentLogView, PaymentView
 from .product_views import ProductViewSet
+from .stats_views import (
+    AverageCartView,
+    CustomerRecurrenceView,
+    OrdersPerCustomerView,
+    SalesStatsView,
+    TopProductsView,
+)
 from .user_views import MeView
 from .views import health
 
 category_list = CategoryViewSet.as_view({"get": "list", "post": "create"})
-category_detail = CategoryViewSet.as_view({"get": "retrieve", "patch": "partial_update", "delete": "destroy"})
+category_detail = CategoryViewSet.as_view(
+    {"get": "retrieve", "patch": "partial_update", "delete": "destroy"}
+)
 
 product_list = ProductViewSet.as_view({"get": "list", "post": "create"})
-product_detail = ProductViewSet.as_view({"get": "retrieve", "patch": "partial_update", "delete": "destroy"})
+product_detail = ProductViewSet.as_view(
+    {"get": "retrieve", "patch": "partial_update", "delete": "destroy"}
+)
 
 urlpatterns = [
     path("health/", health, name="health"),
@@ -41,6 +51,14 @@ urlpatterns = [
     path("stats/top-products/", TopProductsView.as_view(), name="stats-top-products"),
     path("stats/sales/", SalesStatsView.as_view(), name="stats-sales"),
     path("stats/average-cart/", AverageCartView.as_view(), name="stats-average-cart"),
-    path("stats/orders-per-customer/", OrdersPerCustomerView.as_view(), name="stats-orders-per-customer"),
-    path("stats/customer-recurrence/", CustomerRecurrenceView.as_view(), name="stats-customer-recurrence"),
+    path(
+        "stats/orders-per-customer/",
+        OrdersPerCustomerView.as_view(),
+        name="stats-orders-per-customer",
+    ),
+    path(
+        "stats/customer-recurrence/",
+        CustomerRecurrenceView.as_view(),
+        name="stats-customer-recurrence",
+    ),
 ]

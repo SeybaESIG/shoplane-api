@@ -27,17 +27,13 @@ def _fetch_cart_for_response(cart):
 def _require_open_cart(cart):
     """Raise a clear error if the cart is no longer modifiable."""
     if cart.status != CartStatus.OPEN:
-        raise PermissionDenied(
-            f"Cart cannot be modified because its status is '{cart.status}'."
-        )
+        raise PermissionDenied(f"Cart cannot be modified because its status is '{cart.status}'.")
 
 
 def _get_cart_item(cart, product_slug):
     """Fetch a CartItem by product slug within a cart. Raises 404 if not found."""
     try:
-        return CartItem.objects.select_related("product").get(
-            cart=cart, product__slug=product_slug
-        )
+        return CartItem.objects.select_related("product").get(cart=cart, product__slug=product_slug)
     except CartItem.DoesNotExist:
         raise NotFound(f"No item with product slug '{product_slug}' in your cart.")
 

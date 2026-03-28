@@ -4,25 +4,9 @@ from uuid import uuid4
 import pytest
 from django.core.cache import cache, caches
 
-
-@pytest.fixture(autouse=True)
-def use_locmem_cache(settings):
-    """
-    Use in-memory cache for all tests so no Redis server is required.
-    caches.close_all() drops any existing backend connection so the handler
-    picks up the new settings on its next access.
-    """
-    settings.CACHES = {
-        "default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}
-    }
-    caches.close_all()
-    cache.clear()
-    yield
-    cache.clear()
-    caches.close_all()
-
-
-from shoplane.models import (
+# Models are imported after the autouse fixture so Django's app registry is
+# fully initialised before the first import of shoplane.models.
+from shoplane.models import (  # noqa: E402
     Cart,
     Category,
     Order,
@@ -31,6 +15,21 @@ from shoplane.models import (
     Product,
     User,
 )
+
+
+@pytest.fixture(autouse=True)
+def use_locmem_cache(settings):
+    """
+    Use in-memory cache for all tests so no Redis server is required.
+    caches.close_all() drops any existing backend connection so the handler
+    picks up the new settings on its next access.
+    """
+    settings.CACHES = {"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}}
+    caches.close_all()
+    cache.clear()
+    yield
+    cache.clear()
+    caches.close_all()
 
 
 @pytest.fixture

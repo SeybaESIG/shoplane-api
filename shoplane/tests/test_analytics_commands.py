@@ -4,10 +4,10 @@ Tests for analytics management commands.
 DB-source tests use the Django ORM against the test database.
 CSV-source tests write a temporary file and verify the command reads it correctly.
 """
+
 import csv
 import os
 import tempfile
-from collections import defaultdict
 from decimal import Decimal
 from uuid import uuid4
 
@@ -17,10 +17,10 @@ from django.utils.timezone import now
 
 from shoplane.models import Category, Order, OrderItem, OrderStatus, Product, User
 
-
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
+
 
 @pytest.fixture
 def user(db):
@@ -62,6 +62,7 @@ def product(category, user):
 
 def _confirmed_order(user, product, total, qty=1, days_ago=0):
     from datetime import timedelta
+
     order = Order.objects.create(
         user=user,
         order_number=f"ORD-{uuid4().hex[:10]}",
@@ -70,9 +71,7 @@ def _confirmed_order(user, product, total, qty=1, days_ago=0):
         status=OrderStatus.CONFIRMED,
     )
     if days_ago:
-        Order.objects.filter(pk=order.pk).update(
-            created_at=now() - timedelta(days=days_ago)
-        )
+        Order.objects.filter(pk=order.pk).update(created_at=now() - timedelta(days=days_ago))
         order.refresh_from_db()
     OrderItem.objects.create(
         order=order,
@@ -100,6 +99,7 @@ def _csv_file(rows, header):
 # analytics_top_products
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.django_db
 class TestAnalyticsTopProductsCommand:
     def test_db_source_produces_output(self, capsys, product, user):
@@ -111,12 +111,20 @@ class TestAnalyticsTopProductsCommand:
     def test_db_source_rank_order(self, capsys, category, user):
         s1, s2 = uuid4().hex[:6], uuid4().hex[:6]
         p1 = Product.objects.create(
-            name=f"Pop-{s1}", slug=f"pop-{s1}", category=category,
-            price=Decimal("10"), stock=100, updated_by=user,
+            name=f"Pop-{s1}",
+            slug=f"pop-{s1}",
+            category=category,
+            price=Decimal("10"),
+            stock=100,
+            updated_by=user,
         )
         p2 = Product.objects.create(
-            name=f"Nic-{s2}", slug=f"nic-{s2}", category=category,
-            price=Decimal("10"), stock=100, updated_by=user,
+            name=f"Nic-{s2}",
+            slug=f"nic-{s2}",
+            category=category,
+            price=Decimal("10"),
+            stock=100,
+            updated_by=user,
         )
         _confirmed_order(user, p1, total="100", qty=10)
         _confirmed_order(user, p2, total="20", qty=2)
@@ -129,8 +137,12 @@ class TestAnalyticsTopProductsCommand:
         for _ in range(5):
             s = uuid4().hex[:6]
             p = Product.objects.create(
-                name=f"P-{s}", slug=f"p-{s}", category=category,
-                price=Decimal("5"), stock=10, updated_by=user,
+                name=f"P-{s}",
+                slug=f"p-{s}",
+                category=category,
+                price=Decimal("5"),
+                stock=10,
+                updated_by=user,
             )
             _confirmed_order(user, p, total="5", qty=1)
             products.append(p)
@@ -174,6 +186,7 @@ class TestAnalyticsTopProductsCommand:
 # analytics_sales
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.django_db
 class TestAnalyticsSalesCommand:
     def test_db_source_day_period(self, capsys, product, user):
@@ -195,8 +208,16 @@ class TestAnalyticsSalesCommand:
     def test_csv_source(self, capsys):
         path = _csv_file(
             [
-                {"created_at": "2024-01-15 10:00:00", "total_price": "50.00", "status": "CONFIRMED"},
-                {"created_at": "2024-01-15 12:00:00", "total_price": "30.00", "status": "CONFIRMED"},
+                {
+                    "created_at": "2024-01-15 10:00:00",
+                    "total_price": "50.00",
+                    "status": "CONFIRMED",
+                },
+                {
+                    "created_at": "2024-01-15 12:00:00",
+                    "total_price": "30.00",
+                    "status": "CONFIRMED",
+                },
                 {"created_at": "2024-01-15 14:00:00", "total_price": "99.00", "status": "PENDING"},
             ],
             ["created_at", "total_price", "status"],
@@ -212,6 +233,7 @@ class TestAnalyticsSalesCommand:
 # ---------------------------------------------------------------------------
 # analytics_average_cart
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.django_db
 class TestAnalyticsAverageCartCommand:
@@ -237,8 +259,16 @@ class TestAnalyticsAverageCartCommand:
     def test_csv_source_overall(self, capsys):
         path = _csv_file(
             [
-                {"created_at": "2024-02-01 10:00:00", "total_price": "100.00", "status": "CONFIRMED"},
-                {"created_at": "2024-02-01 11:00:00", "total_price": "60.00", "status": "CONFIRMED"},
+                {
+                    "created_at": "2024-02-01 10:00:00",
+                    "total_price": "100.00",
+                    "status": "CONFIRMED",
+                },
+                {
+                    "created_at": "2024-02-01 11:00:00",
+                    "total_price": "60.00",
+                    "status": "CONFIRMED",
+                },
                 {"created_at": "2024-02-01 12:00:00", "total_price": "999.00", "status": "PENDING"},
             ],
             ["created_at", "total_price", "status"],
@@ -254,6 +284,7 @@ class TestAnalyticsAverageCartCommand:
 # ---------------------------------------------------------------------------
 # analytics_orders_per_customer
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.django_db
 class TestAnalyticsOrdersPerCustomerCommand:
@@ -292,6 +323,7 @@ class TestAnalyticsOrdersPerCustomerCommand:
 # ---------------------------------------------------------------------------
 # analytics_customer_recurrence
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.django_db
 class TestAnalyticsCustomerRecurrenceCommand:

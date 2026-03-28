@@ -2,7 +2,7 @@ from collections import Counter
 from datetime import date
 from decimal import Decimal
 
-from django.db.models import Avg, Count, DecimalField, FloatField, Sum
+from django.db.models import Avg, Count, DecimalField, Sum
 from django.db.models.functions import TruncDay, TruncMonth, TruncWeek
 from drf_spectacular.utils import extend_schema
 from rest_framework.exceptions import ValidationError
@@ -11,7 +11,6 @@ from rest_framework.views import APIView
 
 from .api.responses import success_response
 from .models import Order, OrderItem, OrderStatus
-
 
 _TRUNC_FUNCTIONS = {
     "day": TruncDay,
@@ -22,15 +21,14 @@ _TRUNC_FUNCTIONS = {
 TOP_PRODUCTS_MAX_LIMIT = 50
 TOP_PRODUCTS_DEFAULT_LIMIT = 10
 
+
 def _parse_date(value, param_name):
     if not value:
         return None
     try:
         return date.fromisoformat(value)
     except ValueError:
-        raise ValidationError(
-            {param_name: f"Invalid date '{value}'. Expected format: YYYY-MM-DD."}
-        )
+        raise ValidationError({param_name: f"Invalid date '{value}'. Expected format: YYYY-MM-DD."})
 
 
 def _apply_date_range(queryset, request):
@@ -46,6 +44,7 @@ def _apply_date_range(queryset, request):
 
 def _period_fmt(period):
     return {"day": "%Y-%m-%d", "week": "%Y-%m-%d", "month": "%Y-%m"}[period]
+
 
 class TopProductsView(APIView):
     """
@@ -68,8 +67,7 @@ class TopProductsView(APIView):
         limit = min(max(limit, 1), TOP_PRODUCTS_MAX_LIMIT)
 
         results = (
-            OrderItem.objects
-            .filter(order__status=OrderStatus.CONFIRMED)
+            OrderItem.objects.filter(order__status=OrderStatus.CONFIRMED)
             .values("product__slug", "product__name")
             .annotate(total_quantity=Sum("quantity"))
             .order_by("-total_quantity")[:limit]
@@ -115,8 +113,7 @@ class SalesStatsView(APIView):
 
         trunc_fn = _TRUNC_FUNCTIONS[period]
         results = (
-            orders
-            .annotate(period=trunc_fn("created_at"))
+            orders.annotate(period=trunc_fn("created_at"))
             .values("period")
             .annotate(
                 total_sales=Sum("total_price", output_field=DecimalField()),
@@ -138,6 +135,7 @@ class SalesStatsView(APIView):
             message="Sales stats retrieved successfully",
             data=data,
         )
+
 
 class AverageCartView(APIView):
     """
@@ -167,8 +165,7 @@ class AverageCartView(APIView):
         if period:
             trunc_fn = _TRUNC_FUNCTIONS[period]
             results = (
-                orders
-                .annotate(bucket=trunc_fn("created_at"))
+                orders.annotate(bucket=trunc_fn("created_at"))
                 .values("bucket")
                 .annotate(
                     average_order_value=Avg("total_price", output_field=DecimalField()),
@@ -181,7 +178,8 @@ class AverageCartView(APIView):
                     "period": row["bucket"].strftime(_period_fmt(period)),
                     "average_order_value": (
                         round(Decimal(str(row["average_order_value"])), 2)
-                        if row["average_order_value"] is not None else None
+                        if row["average_order_value"] is not None
+                        else None
                     ),
                     "order_count": row["order_count"],
                 }
@@ -200,9 +198,7 @@ class AverageCartView(APIView):
         return success_response(
             message="Average cart retrieved successfully",
             data={
-                "average_order_value": (
-                    round(Decimal(str(avg)), 2) if avg is not None else None
-                ),
+                "average_order_value": (round(Decimal(str(avg)), 2) if avg is not None else None),
                 "order_count": agg["order_count"],
             },
         )
@@ -228,11 +224,7 @@ class OrdersPerCustomerView(APIView):
         orders = Order.objects.filter(status=OrderStatus.CONFIRMED)
         orders = _apply_date_range(orders, request)
 
-        per_user = list(
-            orders
-            .values("user_id")
-            .annotate(order_count=Count("id"))
-        )
+        per_user = list(orders.values("user_id").annotate(order_count=Count("id")))
 
         if not per_user:
             return success_response(
@@ -284,11 +276,7 @@ class CustomerRecurrenceView(APIView):
         orders = Order.objects.filter(status=OrderStatus.CONFIRMED)
         orders = _apply_date_range(orders, request)
 
-        per_user = list(
-            orders
-            .values("user_id")
-            .annotate(order_count=Count("id"))
-        )
+        per_user = list(orders.values("user_id").annotate(order_count=Count("id")))
 
         if not per_user:
             return success_response(

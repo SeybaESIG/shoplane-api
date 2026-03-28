@@ -56,7 +56,7 @@ class UpdateItemSerializer(serializers.Serializer):
 
     def validate_quantity(self, value):
         """
-        Stock check is done in the view where we have the product instance.
+        Stock check is performed in the view where the product instance is available.
         This only enforces the minimum value constraint.
         """
         return value
