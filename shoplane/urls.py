@@ -4,7 +4,7 @@ from .auth_views import JWTLoginView, JWTLogoutView, JWTRefreshView, JWTVerifyVi
 from .cart_views import CartItemView, CartView
 from .category_views import CategoryViewSet
 from .export_views import CustomerExportView, OrderExportView
-from .stats_views import SalesStatsView, TopProductsView
+from .stats_views import AverageCartView, CustomerRecurrenceView, OrdersPerCustomerView, SalesStatsView, TopProductsView
 from .order_views import OrderDetailView, OrderListCreateView
 from .payment_views import PaymentLogView, PaymentView
 from .product_views import ProductViewSet
@@ -40,4 +40,7 @@ urlpatterns = [
     path("exports/customers/", CustomerExportView.as_view(), name="export-customers"),
     path("stats/top-products/", TopProductsView.as_view(), name="stats-top-products"),
     path("stats/sales/", SalesStatsView.as_view(), name="stats-sales"),
+    path("stats/average-cart/", AverageCartView.as_view(), name="stats-average-cart"),
+    path("stats/orders-per-customer/", OrdersPerCustomerView.as_view(), name="stats-orders-per-customer"),
+    path("stats/customer-recurrence/", CustomerRecurrenceView.as_view(), name="stats-customer-recurrence"),
 ]
